@@ -1,70 +1,43 @@
 pe01_PrimerExamenParcial.java
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class EscuelaInscripcion {
 
-    // Definición de constantes para los costos de inscripción
     private static final int COSTO_ALUMNO = 40;
     private static final int COSTO_DOCENTE = 60;
     private static final int COSTO_TRABAJADOR = 80;
 
     public static void main(String[] args) {
-        // Crear una lista para almacenar los participantes
-        ArrayList<Participante> participantes = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
 
-        // Contadores y acumuladores para los cálculos
-        int totalAlumnos = 0;
-        int totalDocentes = 0;
-        int totalTrabajadores = 0;
-        int totalHombres = 0;
-        int totalMujeres = 0;
-        int totalRechazados = 0;
-        int totalEdad = 0;
-        int totalRecaudadoAlumnos = 0;
-        int totalRecaudadoDocentes = 0;
-        int totalRecaudadoTrabajadores = 0;
+        // Contadores y acumuladores
+        int totalAlumnos = 0, totalDocentes = 0, totalTrabajadores = 0;
+        int totalHombres = 0, totalMujeres = 0, totalRechazados = 0;
+        int totalEdad = 0, totalRecaudadoAlumnos = 0, totalRecaudadoDocentes = 0, totalRecaudadoTrabajadores = 0;
 
         while (true) {
-            // Solicitar datos del participante
-            System.out.println("Ingrese el nombre del participante (o 'salir' para terminar): ");
-            String nombre = scanner.nextLine();
+            String nombre = leerNombre(scanner);
             if (nombre.equalsIgnoreCase("salir")) break;
 
-            System.out.println("Ingrese la edad del participante: ");
-            int edad = scanner.nextInt();
-            scanner.nextLine();  // Limpiar el buffer del scanner
+            int edad = leerEdad(scanner);
+            if (edad < 0) continue; // Error en la edad
 
-            System.out.println("Ingrese el sexo del participante (H/M): ");
-            String sexo = scanner.nextLine();
-            if (!sexo.equalsIgnoreCase("H") && !sexo.equalsIgnoreCase("M")) {
-                System.out.println("Sexo inválido. Ingrese H para Hombre o M para Mujer.");
-                continue;
-            }
+            String sexo = leerSexo(scanner);
+            if (sexo == null) continue; // Error en el sexo
 
-            System.out.println("Ingrese el tipo de participante (Alumno, Docente, Trabajador): ");
-            String tipoParticipante = scanner.nextLine();
+            String tipoParticipante = leerTipoParticipante(scanner);
+            if (tipoParticipante == null) continue; // Error en el tipo de participante
 
-            // Validar la edad del participante
+            // Validar edad
             if (edad < 23) {
                 System.out.println("El participante ha sido rechazado por no cumplir con la edad mínima.");
                 totalRechazados++;
                 continue;
             }
 
-            // Crear un nuevo objeto Participante
-            Participante participante = new Participante(nombre, edad, sexo, tipoParticipante);
-
-            // Mostrar mensaje de bienvenida
-            System.out.println("Bienvenido " + participante.getNombre() + "!");
-            System.out.println("Edad: " + participante.getEdad());
-            System.out.println("Sexo: " + participante.getSexo());
-            System.out.println("Tipo de Participante: " + participante.getTipoParticipante());
-
             // Contar y acumular datos
-            switch (participante.getTipoParticipante().toLowerCase()) {
+            switch (tipoParticipante.toLowerCase()) {
                 case "alumno":
                     totalAlumnos++;
                     totalRecaudadoAlumnos += COSTO_ALUMNO;
@@ -82,19 +55,16 @@ public class EscuelaInscripcion {
                     continue;
             }
 
-            // Contar sexo
-            if (participante.getSexo().equalsIgnoreCase("H")) {
+            if (sexo.equalsIgnoreCase("H")) {
                 totalHombres++;
             } else {
                 totalMujeres++;
             }
 
-            // Acumulación de datos
-            totalEdad += participante.getEdad();
-            participantes.add(participante);
+            totalEdad += edad;
         }
 
-        // Cálculo de totales
+        // Calcular resultados
         int totalParticipantes = totalAlumnos + totalDocentes + totalTrabajadores;
         int totalRecaudadoGeneral = totalRecaudadoAlumnos + totalRecaudadoDocentes + totalRecaudadoTrabajadores;
         double promedioEdad = totalParticipantes > 0 ? (double) totalEdad / totalParticipantes : 0;
@@ -113,7 +83,7 @@ public class EscuelaInscripcion {
         System.out.println("Total Recaudado de Trabajadores: " + totalRecaudadoTrabajadores);
         System.out.println("Total Recaudado General: " + totalRecaudadoGeneral);
 
-        // Mensaje final basado en el total recaudado
+        // Mensaje final
         if (totalRecaudadoGeneral < 50) {
             System.out.println("El evento concluye con ganancias BAJAS.");
         } else if (totalRecaudadoGeneral < 1000) {
@@ -124,35 +94,41 @@ public class EscuelaInscripcion {
 
         scanner.close();
     }
-}
 
-// Clase que representa a un participante
-class Participante {
-    private String nombre;
-    private int edad;
-    private String sexo;
-    private String tipoParticipante;
-
-    public Participante(String nombre, int edad, String sexo, String tipoParticipante) {
-        this.nombre = nombre;
-        this.edad = edad;
-        this.sexo = sexo;
-        this.tipoParticipante = tipoParticipante;
+    private static String leerNombre(Scanner scanner) {
+        System.out.println("Ingrese el nombre del participante (o 'salir' para terminar): ");
+        return scanner.nextLine();
     }
 
-    public String getNombre() {
-        return nombre;
+    private static int leerEdad(Scanner scanner) {
+        System.out.println("Ingrese la edad del participante: ");
+        try {
+            return Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Edad inválida. Intente de nuevo.");
+            return -1;
+        }
     }
 
-    public int getEdad() {
-        return edad;
+    private static String leerSexo(Scanner scanner) {
+        System.out.println("Ingrese el sexo del participante (H/M): ");
+        String sexo = scanner.nextLine();
+        if (sexo.equalsIgnoreCase("H") || sexo.equalsIgnoreCase("M")) {
+            return sexo;
+        } else {
+            System.out.println("Sexo inválido. Ingrese H para Hombre o M para Mujer.");
+            return null;
+        }
     }
 
-    public String getSexo() {
-        return sexo;
-    }
-
-    public String getTipoParticipante() {
-        return tipoParticipante;
+    private static String leerTipoParticipante(Scanner scanner) {
+        System.out.println("Ingrese el tipo de participante (Alumno, Docente, Trabajador): ");
+        String tipo = scanner.nextLine();
+        if (tipo.equalsIgnoreCase("Alumno") || tipo.equalsIgnoreCase("Docente") || tipo.equalsIgnoreCase("Trabajador")) {
+            return tipo;
+        } else {
+            System.out.println("Tipo de participante inválido. Ingrese Alumno, Docente o Trabajador.");
+            return null;
+        }
     }
 }
